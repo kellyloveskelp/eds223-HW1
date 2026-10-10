@@ -1,0 +1,61 @@
+```{r}
+library(tidyverse)
+library(sf)
+library(here)
+
+# read in geodatabase of EJScreen data at the Census Block Group level
+ejscreen <- sf::st_read(here::here("data", "ejscreen","EJSCREEN_2023_BG_StatePct_with_AS_CNMI_GU_VI.gdb")) 
+
+# filter to a state you are interested in
+louisiana <- ejscreen %>%
+  dplyr::filter(ST_ABBREV == "LA") 
+```
+
+```{r}
+cancer <- louisiana %>%
+  dplyr::filter(CANCER >= 50) 
+```
+
+```{r}
+# filter to a county you are interested in
+river_parish <- louisiana %>%
+  dplyr::filter(CNTY_NAME %in% c("Ascension Parish", "St. Charles Parish", "St. James Parish", "St. John the Baptist Parish")) 
+
+# find the average values for all variables within counties
+louis_counties <- aggregate(louisiana, by = list(louisiana$CNTY_NAME), FUN = mean) |> 
+    rename(County_Label = Group.1)
+```
+
+```{r}
+library(stars)
+library(tmap)
+library(ggplot2)
+library(viridisLite)
+
+tm_shape(louis_counties) + 
+    tm_graticules() + 
+    tm_fill(
+        col = "PEOPCOLORPCT",
+        palette = 'cividis'
+        ) +
+    tm_borders(
+        ) +
+tm_shape(cancer) +
+    tm_dots(
+        col ="CANCER",
+        palette = "red",
+        )
+```
+
+```{r}
+tm_shape(river_parish) +
+    tm_fill(
+        col = "CANCER",
+        palette = 'cividis'
+    ) +
+    tm_borders(
+        lwd = 0.5,
+        lty = "dashed"
+    )
+
+```
