@@ -1,12 +1,12 @@
 ---
 title: "Homework Assignment 1"
-subtitle: "Making maps with `tmap`"
+subtitle: "Making maps with \`tmap\`"
 author: "Kelly Morgan"
 date: 2026-10-10
 format: pdf
-execute: 
-  warning: false
-  message: false
+execute:
+warning: false
+message: false
 ---
 
 # Cancer Alley in Louisiana, USA
