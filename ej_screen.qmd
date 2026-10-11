@@ -4,9 +4,14 @@ subtitle: "Making maps with `tmap`"
 author: "Kelly Morgan"
 date: 2026-10-10
 format: pdf
+execute: 
+  warning: false
+  message: false
 ---
 
 # Cancer Alley in Louisiana, USA
+
+![](Cancer%20Alley%20LA.jpg)
 
 "Cancer Alley" is an 85-mile stretch of land along the Mississippi River in Louisiana where about 25% of the United States' petroleum products are produced. Due to air pollution from these plants, residents in the area suffer from " increased rates and risks of maternal, reproductive, and newborn health harms; respiratory illnesses; and cancer" ([Public Health On Call, Johns Hopkins Bloomberg School)](https://publichealth.jhu.edu/2025/the-shocking-hazards-of-louisianas-cancer-alley). This has been a well-documented environmental injustice issue since the 1980s.
 
@@ -29,7 +34,7 @@ ejscreen <- sf::st_read(here::here("data", "ejscreen","EJSCREEN_2023_BG_StatePct
 
 ## Filter data
 
-Counties, or *parishes*, along "Cancer Alley" include: Ascension Parish, St. Charles Parish", St. James Parish" St. John the Baptist Parish, Iberville Parish, West Baton Rouge Parish, East Baton Rouge Parish, Jefferson Parish, and Orleans Parish.
+Counties, or *parishes*, along "Cancer Alley" include: Ascension Parish, St. Charles Parish, St. James Parish, St. John the Baptist Parish, Iberville Parish, West Baton Rouge Parish, East Baton Rouge Parish, Jefferson Parish, and Orleans Parish.
 
 ```{r}
 # filter to a state you are interested in
@@ -47,6 +52,8 @@ river_parish <- louisiana %>%
 
 ## Aggregate data
 
+Aggregating the dataset by county allows for visualization of each metrics by county below.
+
 ```{r}
 # find the average values for all variables within counties
 louis_counties <- aggregate(louisiana, by = list(louisiana$CNTY_NAME), FUN = mean) |> rename(County_Label = Group.1)
@@ -61,13 +68,14 @@ county_health <- tm_shape(louis_counties) +
     tm_graticules() + 
     tm_polygons(
         fill = "RSEI_AIR",
-        fill.scale = tm_scale(n = 4, style = "quantile", values = "plasma"),
+        fill.scale = tm_scale(n = 8, style = "quantile", values = "plasma"),
         fill.legend = tm_legend(title = "Toxic Air Pollution"),
         lwd = 0.5
         ) +
     tm_scalebar(
         position = "bottom"
         ) +
+    tm_compass() +
     tm_title("Air Pollution in Louisiana")
 county_health
 ```
@@ -84,13 +92,21 @@ river_health <- tm_shape(river_parish) +
     tm_scalebar(
         position = "bottom"
     ) + 
-    tm_title("Cancer Alley Along the Mississipi") +
+    tm_compass() +
+    tm_title("Cancer Alley") +
 tm_shape(river_counties) +
-    tm_text(text = "County_Label")
+    tm_text(
+        text = "County_Label",
+        size = 0.5
+    )
 river_health
 ```
 
 ## Map Interpretations
+
+The "Toxic Air Pollution" map clearly demonstrates heightened air pollution around the River Parishes in Louisiana along the Mississippi (visualized in bright yellow). Two toxic chemicals of note include ethylene oxide and chloroprene, which Johns Hopkins researchers have identified as byproducts of foodstuff sterilization and neoprene production in the area. The River Parishes are home to the only facility in the U.S. that makes neoprene, which one researcher notes it right next to an elementary school (Nachman and DeCarlo).
+
+Taking a closer look at the River Parishes, also known as "Cancer Alley," cancer risk appears to be over 40 units and upwards of 200 units in some regions. The Ascension, St. John the Baptist, and Iberville Parishes appear to have the highest cancer risk overall. In an article from 2023, the EPA cited cancer risk in the area as seven times the national average, with St. John the Baptist Parish having the highest risk in the country (Amorebieta et al 2023). Johns Hopkins Bloomberg School for Public Health continues to conduct research on the extreme environmental injustice and looks for treatments to the diseases resulting from the pollution.
 
 ## Data Citations
 
@@ -98,3 +114,4 @@ river_health
 |------------------------|------------------------|------------------------|
 | EJScreen | Environmental Justice Screening and Mapping Tool (Version 3.2022.3). Public Environmental Data Partners (PEDP) | <https://pedp-ejscreen.azurewebsites.net/> |
 | "Louisiana’s ‘Cancer Alley’ Is More Deadly Than Previously Imagined" | Nachman, Keeve; DeCarlo, Peter. (2025, August 04). Louisiana’s ‘Cancer Alley’ Is More Deadly Than Previously Imagined. *Public Health On Call*. | <https://publichealth.jhu.edu/2025/the-shocking-hazards-of-louisianas-cancer-alley> |
+| Toxic school: How the government failed Black residents in Louisiana's 'Cancer Alley'. | [Maite Amorebieta](https://www.nbcnews.com/author/maite-amorebieta-ncpn1295737), [Cynthia McFadden](https://www.nbcnews.com/author/cynthia-mcfadden-ncpn169906), Katie Reimchen and [Rich Schapiro](https://www.nbcnews.com/author/rich-schapiro-ncpn913276). (2023, March 16).*Toxic school: How the government failed Black residents in Louisiana's 'Cancer Alley'. NBC News.* | <https://www.nbcnews.com/news/us-news/toxic-school-government-failed-black-residents-louisianas-cancer-alley-rcna72504> |
