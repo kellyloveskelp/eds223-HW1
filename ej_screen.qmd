@@ -1,52 +1,75 @@
+---
+title: "Homework Assignment 1"
+subtitle: "Making maps with `tmap`"
+author: "Kelly Morgan"
+date: 2026-10-10
+format: pdf
+---
+
+# Cancer Alley in Louisiana, USA
+
+"Cancer Alley" is an 85-mile stretch of land along the Mississippi River in Louisiana where about 25% of the United States' petroleum products are produced. Due to air pollution from these plants, residents in the area suffer from " increased rates and risks of maternal, reproductive, and newborn health harms; respiratory illnesses; and cancer" ([Public Health On Call, Johns Hopkins Bloomberg School)](https://publichealth.jhu.edu/2025/the-shocking-hazards-of-louisianas-cancer-alley). This has been a well-documented environmental injustice issue since the 1980s.
+
+**Project Objective:** Visualize cancer risk in Louisiana resulting from industry air pollution.
+
+## Load libraries and import data
+
 ```{r}
 library(tidyverse)
 library(sf)
 library(here)
 library(stars)
 library(tmap)
-library(ggplot2)
+library(viridisLite)
+
 
 # read in geodatabase of EJScreen data at the Census Block Group level
 ejscreen <- sf::st_read(here::here("data", "ejscreen","EJSCREEN_2023_BG_StatePct_with_AS_CNMI_GU_VI.gdb")) 
+```
 
+## Filter data
+
+Counties, or *parishes*, along "Cancer Alley" include: Ascension Parish, St. Charles Parish", St. James Parish" St. John the Baptist Parish, Iberville Parish, West Baton Rouge Parish, East Baton Rouge Parish, Jefferson Parish, and Orleans Parish.
+
+```{r}
 # filter to a state you are interested in
 louisiana <- ejscreen %>%
   dplyr::filter(ST_ABBREV == "LA")
-```
 
-```{r}
 # filter to EJ of interest
 cancer <- louisiana %>%
   dplyr::filter(CANCER >= 50)
-```
 
-```{r}
 # filter to a county you are interested in
 river_parish <- louisiana %>%
   dplyr::filter(CNTY_NAME %in% c("Ascension Parish", "St. Charles Parish", "St. James Parish", "St. John the Baptist Parish", "Iberville Parish", "West Baton Rouge Parish", "East Baton Rouge Parish", "Jefferson Parish", "Orleans Parish")) 
+```
 
+## Aggregate data
+
+```{r}
 # find the average values for all variables within counties
 louis_counties <- aggregate(louisiana, by = list(louisiana$CNTY_NAME), FUN = mean) |> rename(County_Label = Group.1)
 
 river_counties <- aggregate(river_parish, by = list(river_parish$CNTY_NAME), FUN = mean) |> rename(County_Label = Group.1)
 ```
 
-```{r}
-library(viridisLite)
+## Visualize data
 
-counties <- tm_shape(louis_counties) + 
+```{r}
+county_health <- tm_shape(louis_counties) + 
     tm_graticules() + 
     tm_polygons(
         fill = "RSEI_AIR",
         fill.scale = tm_scale(n = 4, style = "quantile", values = "plasma"),
-        fill.legend = tm_legend(title = "Toxic Releases to Air"),
+        fill.legend = tm_legend(title = "Toxic Air Pollution"),
         lwd = 0.5
         ) +
     tm_scalebar(
         position = "bottom"
         ) +
     tm_title("Air Pollution in Louisiana")
-counties
+county_health
 ```
 
 ```{r}
@@ -61,8 +84,17 @@ river_health <- tm_shape(river_parish) +
     tm_scalebar(
         position = "bottom"
     ) + 
-    tm_title("Cancer Alley") +
+    tm_title("Cancer Alley Along the Mississipi") +
 tm_shape(river_counties) +
     tm_text(text = "County_Label")
 river_health
 ```
+
+## Map Interpretations
+
+## Data Citations
+
+| Source | Citation | Link |
+|------------------------|------------------------|------------------------|
+| EJScreen | Environmental Justice Screening and Mapping Tool (Version 3.2022.3). Public Environmental Data Partners (PEDP) | <https://pedp-ejscreen.azurewebsites.net/> |
+| "Louisiana’s ‘Cancer Alley’ Is More Deadly Than Previously Imagined" | Nachman, Keeve; DeCarlo, Peter. (2025, August 04). Louisiana’s ‘Cancer Alley’ Is More Deadly Than Previously Imagined. *Public Health On Call*. | <https://publichealth.jhu.edu/2025/the-shocking-hazards-of-louisianas-cancer-alley> |
