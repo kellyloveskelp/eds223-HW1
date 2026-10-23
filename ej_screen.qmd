@@ -1,12 +1,12 @@
 ---
 title: "Homework Assignment 1"
-subtitle: "Making maps with \`tmap\`"
+subtitle: "Making maps with `tmap`"
 author: "Kelly Morgan"
 date: 2026-10-10
 format: pdf
 execute:
-warning: false
-message: false
+    warning: false
+    message: false
 ---
 
 # Cancer Alley in Louisiana, USA
@@ -84,10 +84,11 @@ county_health
 river_health <- tm_shape(river_parish) +
     tm_polygons(
         fill = "CANCER",
-        fill.scale = tm_scale(n = 8, style = "quantile", values = "plasma"),
-        fill.legend = tm_legend(title = "Cancer Risk"),
+        fill.scale = tm_scale_intervals(breaks = c(0, 30, 50, 100, 200), values = 'plasma'),
+        fill.legend = tm_legend(
+            title = "Cancer Risk"), 
         lty = 'dashed',
-        lwd = 0.2 
+        lwd = 0.2
     ) +
     tm_scalebar(
         position = "bottom"
